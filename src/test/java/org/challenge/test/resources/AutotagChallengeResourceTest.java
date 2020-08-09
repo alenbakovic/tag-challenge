@@ -2,40 +2,27 @@ package org.challenge.test.resources;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
-import opennlp.tools.postag.POSTaggerME;
-import opennlp.tools.sentdetect.SentenceModel;
-import opennlp.tools.tokenize.TokenizerME;
-import opennlp.tools.tokenize.TokenizerModel;
 
-import org.challenge.AutotagChallengeApp;
+import org.challenge.dao.AutotagChallengeDAO;
 import org.challenge.model.TagInfo;
 import org.challenge.resource.AutotagChallengeResource;
 import org.challenge.service.TagService;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -47,58 +34,62 @@ import javax.ws.rs.core.Response;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class AutotagChallengeResourceTest {
 
-//    private static final BookDAO BOOK_DAO = mock(BookDAO.class);
-    private static final TagService tagService = new TagService();
+    private static final AutotagChallengeDAO AUTOTAG_CHALLENGE_DAO = mock(AutotagChallengeDAO.class);
+    private static final TagService TAG_SERVICE = mock(TagService.class);
 
     public static final ResourceExtension RESOURCES = ResourceExtension.builder()
-//            .addResource(new AutotagChallengeResource(BOOK_DAO))
-            .addResource(new AutotagChallengeResource(tagService))
+            .addResource(new AutotagChallengeResource(AUTOTAG_CHALLENGE_DAO, TAG_SERVICE))
             .build();
 
     @Captor
     private ArgumentCaptor<TagInfo> tagCaptor = ArgumentCaptor.forClass(TagInfo.class);
 
     private TagInfo tagInfo;
+    private TagInfo existingInfo;
 
     @BeforeEach
     public void setUp() {
         tagInfo = TagInfo.builder()
-//                .title("The Bridge on the Drina - Na Drini cuprija")
-//                .authors("Ivo Andric")
-//                .numberOfPages(379)
-//                .genre("Historical fiction")
-//                .isbn("9788650526507")
+                .url("https://www.bbc.com/sport/football/53710867")
+                .build();
+        existingInfo = TagInfo.builder()
+                .url("https://www.bbc.com/sport/football/53710867")
+                .tags("goals, lewandowski, ronaldo, league, champions, season, two, record, one, four")
                 .build();
     }
 
     @AfterEach
     public void tearDown() {
-//        reset(BOOK_DAO);
+        reset(AUTOTAG_CHALLENGE_DAO);
     }
 
     @Test
-    public void addBook() {
-//        doNothing().when(BOOK_DAO).addBook(any(Book.class));
-//
-//        final Response response = RESOURCES.target("/bookstore/addBook")
-//                .request()
-//                .post(Entity.entity(book, MediaType.APPLICATION_JSON_TYPE));
-//
-//        verify(BOOK_DAO).addBook(bookCaptor.capture());
-//        assertEquals(bookCaptor.getValue().getIsbn(), book.getIsbn());
-//        assertEquals(response.getStatusInfo(), Response.Status.OK);
+    public void testExistingTags() throws IOException {
+//        doNothing().when(AUTOTAG_CHALLENGE_DAO).addURLTags(any(TagInfo.class));
+        when(AUTOTAG_CHALLENGE_DAO.getTags(any(String.class))).thenReturn(existingInfo);
+
+        final Response response = RESOURCES.target("/autotag/getTags")
+                .request()
+                .post(Entity.entity(tagInfo, MediaType.APPLICATION_JSON_TYPE));
+
+        verify(AUTOTAG_CHALLENGE_DAO, times(0)).addURLTags(any(TagInfo.class));
+        verify(TAG_SERVICE, times(0)).getTags(any(String.class));
+        assertEquals(response.getStatusInfo(), Response.Status.OK);
     }
 
     @Test
-    public void getBookByISBN() {
-//        when(BOOK_DAO.getBookByISBN(anyString())).thenReturn(book);
-//
-//        Book responseBook = RESOURCES.target("/bookstore/getBook")
-//                .queryParam("isbn", "9788650526507")
-//                .request().get(Book.class);
-//
-//        verify(BOOK_DAO).getBookByISBN(anyString());
-//        assertEquals(responseBook.getIsbn(), book.getIsbn());
+    public void testNonExistingTags() throws IOException {
+        doNothing().when(AUTOTAG_CHALLENGE_DAO).addURLTags(any(TagInfo.class));
+        when(AUTOTAG_CHALLENGE_DAO.getTags(any(String.class))).thenReturn(null);
+        when(TAG_SERVICE.getTags(any(String.class))).thenReturn(existingInfo.getTags());
+
+        final Response response = RESOURCES.target("/autotag/getTags")
+                .request()
+                .post(Entity.entity(tagInfo, MediaType.APPLICATION_JSON_TYPE));
+
+        verify(AUTOTAG_CHALLENGE_DAO, times(1)).addURLTags(any(TagInfo.class));
+        verify(TAG_SERVICE, times(1)).getTags(any(String.class));
+        assertEquals(response.getStatusInfo(), Response.Status.OK);
     }
 
     @Test

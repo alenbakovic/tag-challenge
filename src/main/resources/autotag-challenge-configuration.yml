@@ -8,13 +8,13 @@ database:
   driverClass: org.postgresql.Driver
 
   # the username
-  user: bakovic
+  user: autotag
 
   # the password
-  password: alen
+  password: admin
 
   # the JDBC URL
-  url: jdbc:postgresql://db:5432/parts
+  url: jdbc:postgresql://db:5432/tagged_links
 
   # any properties specific to your JDBC driver:
   properties:

@@ -37,11 +37,11 @@ public class TagService {
     private static StopWords STOP_WORDS = StopWords.getInstance();
 
 
-    public List<String> getTags(String url) throws IOException {
+    public String getTags(String url) throws IOException {
         final List<String> tokens = getText(url).map(this::tokenizeText).orElse(Collections.emptyList());
         final Map<String, Integer> wordCount = countWords(tokens);
         final Map<String, Integer> sortedKeywords = AutotagChallenteUtils.sortByValue(wordCount);
-        return fetchTags(sortedKeywords);
+        return StringUtils.join(fetchTags(sortedKeywords));
     }
 
     private List<String> fetchTags(Map<String, Integer> sortedKeywords) {

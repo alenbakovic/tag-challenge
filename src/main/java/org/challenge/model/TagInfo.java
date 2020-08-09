@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class TagInfo {
     private String url;
-    private List<String> tags;
+    private String tags;
 }

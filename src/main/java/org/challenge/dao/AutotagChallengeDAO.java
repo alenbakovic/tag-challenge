@@ -10,10 +10,9 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 @RegisterMapper(TagInfoMapper.class)
 public interface AutotagChallengeDAO {
-    @SqlUpdate("INSERT INTO books (title, numberofpages, genre, isbn, authors) " +
-            "VALUES (:title, :numberOfPages, :genre, :isbn, :authors)")
-    void addBook(@BindBean TagInfo tagInfo);
+    @SqlUpdate("INSERT INTO tagged_links (url, tags) VALUES (:url, :tags)")
+    void addURLTags(@BindBean TagInfo tagInfo);
 
-    @SqlQuery("SELECT * FROM books WHERE isbn = :isbn")
-    TagInfo getBookByISBN(@Bind("isbn") String isbn);
+    @SqlQuery("SELECT * FROM tagged_links WHERE url = :url")
+    TagInfo getTags(@Bind("url") String url);
 }

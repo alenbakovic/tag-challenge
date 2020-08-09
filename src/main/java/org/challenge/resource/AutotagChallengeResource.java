@@ -34,20 +34,30 @@ public class AutotagChallengeResource {
 
     private static Logger log = LoggerFactory.getLogger(AutotagChallengeResource.class);
 
-//    private final AutotagChallengeDAO autotagChallengeDAO;
+    private final AutotagChallengeDAO autotagChallengeDAO;
     private final TagService tagService;
 
     @POST
     @Path("/getTags")
     @Consumes(MediaType.APPLICATION_JSON)
     public List<String> getTags(TagInfo tagInfo) {
-        if (StringUtils.isEmpty(tagInfo.getUrl())) {
+        final String url = tagInfo.getUrl();
+        if (StringUtils.isEmpty(url)) {
             log.warn("URL can not be empty.");
             return Collections.emptyList();
         }
-        // check is it in database already
+        // check is it in database already, if yes return
+        final TagInfo existingTagInfo = autotagChallengeDAO.getTags(url);
+        if (existingTagInfo != null && !StringUtils.isEmpty(existingTagInfo.getTags())) {
+            return List.of(StringUtils.split(existingTagInfo.getTags(), ","));
+        }
+
+        // if not get tags and save to dababase
         try {
-            return tagService.getTags(tagInfo.getUrl());
+            final String tags = tagService.getTags(url);
+            final TagInfo info = TagInfo.builder().url(url).tags(tags).build();
+            autotagChallengeDAO.addURLTags(info);
+            return List.of(StringUtils.split(tags, ","));
         } catch (IOException e) {
             return Collections.emptyList();
         }

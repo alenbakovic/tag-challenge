@@ -11,3 +11,6 @@ dependency-reduced-pom.xml
 .classpath
 .project
 .settings
+
+#Database
+pgdata/

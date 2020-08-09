@@ -6,16 +6,15 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class TagInfoMapper implements ResultSetMapper<TagInfo> {
     @Override
     public TagInfo map(int i, ResultSet resultSet, StatementContext statementContext) throws SQLException {
+
         return TagInfo.builder()
-//                .title(resultSet.getString("title"))
-//                .numberOfPages(resultSet.getInt("numberofpages"))
-//                .genre(resultSet.getString("genre"))
-//                .isbn(resultSet.getString("isbn"))
-//                .authors(resultSet.getString("authors"))
+                .url(resultSet.getString("url"))
+                .tags(resultSet.getString("tags"))
                 .build();
     }
 }
