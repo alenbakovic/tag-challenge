@@ -30,8 +30,9 @@ public class AutotagChallengeApp extends Application<AutotagChallengeConfigurati
     public void run(AutotagChallengeConfiguration autotagChallengeConfiguration, Environment environment) throws Exception {
 
         // TODO: Improve this, now this waits unit DB is up and running
-        log.info("sleeping for 30 secs...");
-        Thread.sleep(30000);
+        // this can be less than minute but wanted to be sure
+        log.info("sleeping for 60 secs...");
+        Thread.sleep(60000);
 
         log.info("Configuring postgresql database...");
         final DBIFactory factory = new DBIFactory();
