@@ -29,7 +29,7 @@ public class AutotagChallengeApp extends Application<AutotagChallengeConfigurati
     @Override
     public void run(AutotagChallengeConfiguration autotagChallengeConfiguration, Environment environment) throws Exception {
 
-        // TODO: Improve this, now this wait unit DB is up and running
+        // TODO: Improve this, now this waits unit DB is up and running
         log.info("sleeping for 30 secs...");
         Thread.sleep(30000);
 
